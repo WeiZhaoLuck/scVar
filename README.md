@@ -5,6 +5,7 @@ scVar:
 Install
 ===========
 
+![Docker Pulls](https://img.shields.io/docker/pulls/zhaoweirepository/scvar?style=plastic&label=Docker%20Pulls&logo=docker&logoColor=white&color=blue)
 
 
 Dependency data
@@ -120,7 +121,7 @@ docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <da
 - `<project_path>`: Path to the project directory.
 - `<sample_name>`: Name of the sample to analyze.
 
-For detailed information on inputs, outputs, scripts, and parameters of each module, refer to [documentation/section].
+For detailed information on inputs, outputs, scripts, and parameters of each module, refer to [Guided](https://github.com/WeiZhaoLuck/scVar/blob/main/For_developer.md).
 
 ## Example Demo
 ### Preparatory work
@@ -133,19 +134,57 @@ For detailed information on inputs, outputs, scripts, and parameters of each mod
 ```shell
 docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && cd /results && snakemake --cores 1'
 ```
+#### Output:
+
 
 ### Upstream Analysis
-#### 1. Mutation signature,TMB,Entropy
+#### 1. Mutation signature,TMB,Entropy and Simpson's Index
 
 ```shell
 docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && bash /codes/Analysis_SigTMBEntroy.sh /results/Example Demo'
 ```
+#### Output:
+- **Cosimc Files**: 
+
+|  Signature   | Similarity  |
+|  ----  | ----  |
+| SBS5  | 0.113767901681777 |
+| SBS26  | 0.535572494677588 |
+| SBS37  | 0.0913866557165417 |
+| SBS93  | 0.081081407813563 |
+| unknown  | 0.178191540110529 |
+
+- **TMB File**: 
+
+```txt
+Total length of Endothelium qualifying regions: 672240
+Mutations count of Endothelium: 16
+TMB of Endothelium qualifying regions: 23.80102344400809234797
+Total length of Alveolar_cell qualifying regions: 2910688
+Mutations count of Alveolar_cell: 40
+TMB of Alveolar_cell qualifying regions: 13.74245539198979760111
+Total length of All qualifying regions: 3051450
+Mutations count of All: 41
+TMB of All qualifying regions: 13.43623523243048386832
+```
+
+- **Entropy and Simpson's Index File**:
+
+|  mutation_id   | entropy  | simpson|
+|  ----  | ----  | ----  |
+| 10_100208621_T_C  | 0.345117314944953 | 0.8773135906927552 |
+| 10_100208724_T_C  | 0.6136190195993708 | 0.7348484848484849 |
+
 
 #### 2. Celltype Specific Mutations
 
 ```shell
 docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && bash /codes/Calculate_Specific_Mutations.sh /results/Example Demo'
 ```
+
+#### Output:
+
+
 
 
 #### 3. Mutation Clustering
@@ -154,17 +193,23 @@ docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <da
 docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && bash /codes/MutationCluster.sh --path /results/Example --sample Demo --method TF_IDF --flag 0 --number 100 --clustermethod complete'
 ```
 
+#### Output:
+
+
 #### 4. GO and Oncogenic Pathway
 
 ```shell
 docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && bash /codes/GOonco.sh --path /results/Example --sample Demo  --pCutoff 0.05 --qCutoff 0.2'
 ```
+#### Output:
+
 
 #### 5. Psedutime Analysis
 
 ```shell
 docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && bash /codes/Pseudotime.sh --path /results/Example --sample Demo --mutation 7_6004027_A_G,12_25245350_C_G,17_47592542_A_G,22_20708085_C_T,2_28942361_C_A,3_49684128_A_C,3_49684173_G_A,3_49684565_A_G,7_56116040_A_C,9_137717161_G_T,9_137717162_C_A,X_100662268_C_G'
 ```
+#### Output:
 
 
 #### 6. Statistic
@@ -172,6 +217,8 @@ docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_
 ```shell
 docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && bash /codes/Statistic.sh /results/Example Demo'
 ```
+
+#### Output:
 
 
 ## Citation:
