@@ -92,10 +92,10 @@ docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <da
 ```
 - `<project_path>`: Path to the project directory.
 - `<sample_name>`: Name of the sample to analyze.
-- `--method`: Method for clustering (default: TF_IDF).
-- `--flag`: Flag for clustering (default: 0).
-- `--number`: Number of clusters (default: 100).
-- `--clustermethod`: Clustering method (default: complete).
+- `--method`: Method for clustering (options: `var1`, `var2`, `TF_IDF`, default: `var1`).  
+- `--flag`: Flag for clustering (options: `0`, `1`, default: `0`).  
+- `--number`: Number of clusters (integer, default: `100`).  
+- `--clustermethod`: Clustering method (options: `ward.D`, `ward.D2`, `single`, `complete`, `average`, `mcquitty`, `median`, `centroid`, default: `average`).  
 
 ### 4. GO and Oncogenic Pathway
 ```shell
@@ -184,17 +184,20 @@ docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <da
 
 #### Output:
 
-
+|  SNV_label   | p-adjusted  | pvalue| odd_ratio| ref_label1| ref_label2|alt_label1| alt_label2|
+|  ----  | ----  | ----  |----  |----  |----  |----  |----  |
+| 3_65841633_C_T  | 0.008425429478061056 | 1.7268763021236024e-06 |0 |30 |3 |0 |8 |
+| 6_154407634_G_A  | 0.03473458736616632 | 5.695361732513436e-05 |0.01 |30 |2 |1 |6 |
 
 
 #### 3. Mutation Clustering
 
 ```shell
-docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && bash /codes/MutationCluster.sh --path /results/Example --sample Demo --method TF_IDF --flag 0 --number 100 --clustermethod complete'
+docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && bash /codes/MutationCluster.sh --path /results/Example --sample Demo --method TF_IDF --flag 0 --number 80 --clustermethod average'
 ```
 
 #### Output:
-
+<img src="Demo/Results/MutationCluster/heatmap_final_00.png" alt="Mutation Cluster" width="500" height="300">
 
 #### 4. GO and Oncogenic Pathway
 
@@ -202,6 +205,11 @@ docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_
 docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && bash /codes/GOonco.sh --path /results/Example --sample Demo  --pCutoff 0.05 --qCutoff 0.2'
 ```
 #### Output:
+|  ONTOLOGY   | p-adjusted  | pvalue| odd_ratio| ref_label1| ref_label2|alt_label1| alt_label2|
+|  ----  | ----  | ----  |----  |----  |----  |----  |----  |
+| 3_65841633_C_T  | 0.008425429478061056 | 1.7268763021236024e-06 |0 |30 |3 |0 |8 |
+| 6_154407634_G_A  | 0.03473458736616632 | 5.695361732513436e-05 |0.01 |30 |2 |1 |6 |
+
 
 
 #### 5. Psedutime Analysis
@@ -210,7 +218,7 @@ docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_
 docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && bash /codes/Pseudotime.sh --path /results/Example --sample Demo --mutation 7_6004027_A_G,12_25245350_C_G,17_47592542_A_G,22_20708085_C_T,2_28942361_C_A,3_49684128_A_C,3_49684173_G_A,3_49684565_A_G,7_56116040_A_C,9_137717161_G_T,9_137717162_C_A,X_100662268_C_G'
 ```
 #### Output:
-
+<img src="Demo/Results/Pseudotime/12_25245350_C_G.png" alt="Pseudotime Analysis" width="800" height="300">
 
 #### 6. Statistic
 
@@ -219,6 +227,6 @@ docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_
 ```
 
 #### Output:
-
+A report file will be generated. 
 
 ## Citation:
