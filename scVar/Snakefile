@@ -1,0 +1,139 @@
+configfile: "config.yaml"
+###snakemake --dag | dot -Tsvg > dag.svg
+Result_path = config["result_path"]
+Project = config["project"]
+data_path = Result_path+"/"+Project+"/"
+rule all:
+    input:
+        expand(data_path+"{sample}/output_data.h5mu",sample=config["samples"]),
+    
+def Get_fastq(wildcards):
+    return config["samples"][wildcards.sample]
+
+rule Input:
+    input:
+        input_path=Get_fastq
+    params:
+        out_dir=data_path+"{sample}/seurat",
+        sample_name="{sample}",
+    output:
+        data_path+"{sample}/seurat/output_cell_barcodes.tsv",
+        data_path+"{sample}/mapping/run_count_{sample}/outs/possorted_genome_bam.bam",
+    log:
+        stdout=data_path + "{sample}/logs/{sample}_input_stdout.log",
+        stderr=data_path + "{sample}/logs/{sample}_input_stderr.log"
+    shell:
+        """
+        echo "Starting input for {params.sample_name}" >> {log.stderr} && \
+        bash -c 'bash /codes/Input.sh {input} {params.out_dir} {params.sample_name} > {log.stdout} 2>> {log.stderr}' 
+        """
+
+rule Extract_bam:
+    input:
+        barcode_type=data_path+"{sample}/seurat/output_cell_barcodes.tsv",
+    params:
+        extract_sh="/codes/extract_bam_parallel.sh", ##"extract_bam_parallel2.sh"
+        bam_path=data_path+"{sample}/mapping/run_count_{sample}/outs/possorted_genome_bam.bam",
+        threads=config["threads"],
+    output:
+        data_path+"{sample}/mapping/run_count_{sample}/outs/extracted.bam"
+    log:
+        stdout=data_path + "{sample}/logs/{sample}_extract_bam_stdout.log",
+        stderr=data_path + "{sample}/logs/{sample}_extract_bam_stderr.log"
+    shell:
+        """  
+        echo "Starting Extract_bam for {wildcards.sample}" >> {log.stderr} && \
+        bash -c 'time bash {params.extract_sh} {params.bam_path} {input.barcode_type} > {log.stdout} 2>> {log.stderr}'
+        """
+    # log:
+    #     data_path+"{sample}/logs/{sample}_extract_bam.log"
+    # shell:
+    #     "bash {params.extract_sh} {params.bam_path} {input.barcode_type} {params.threads} 2>{log}"
+
+
+rule SNV_Calling:
+    input:
+        bam_file=data_path+"{sample}/mapping/run_count_{sample}/outs/extracted.bam",
+    params:
+        outdir=data_path+"{sample}/mutation/results/variants",
+        script="/codes/gatk_pipeline.sh"
+
+    output:
+        data_path+"{sample}/mutation/results/variants/variants.vcf"
+    log:
+        stdout=data_path + "{sample}/logs/{sample}_SNV_calling_stdout.log",
+        stderr=data_path + "{sample}/logs/{sample}_SNV_calling_stderr.log"
+    shell:
+        """  
+        echo "Starting SNV_calling for {wildcards.sample}" >> {log.stderr} && \
+        bash -c 'time bash {params.script} {input.bam_file} {params.outdir} > {log.stdout} 2>> {log.stderr}'  
+        """
+
+rule Genotype:
+    input:
+        data_path+"{sample}/mutation/results/variants/variants.vcf"
+    params:
+        genotype_sh="/codes/Genotyping.sh",
+        genotype_filter_sh="/codes/Genotype_Mutations_filter.sh",
+        out_path=data_path+"{sample}/genotype/genotype",
+        bam_path=data_path+"{sample}/mapping/run_count_{sample}/outs/extracted.bam",
+        barcode_all=data_path+"{sample}/seurat/barcodes.csv",
+        tmp_tbl_file=data_path+"{sample}/genotype/tbl",
+        filter=config["genotype_filter"],
+        mapq=config["genotype_mapq"],
+        baseq=config["genotype_baseq"],
+        parallel=config["threads"],
+        vaf=config["SNV_filter_vaf"],
+        genotype_all=data_path+"{sample}/genotype/genotype_all.tsv"
+        # sniffer="/p300s/baoym_group/zhaow/projects/scVar/PipelineV2/genptype_parallel/scripts/genotype.py"
+    output:
+        data_path+"{sample}/mutation/results/variants/snp_vaf_final.vcf"
+    log:
+        stdout=data_path + "{sample}/logs/{sample}_genotype_stdout.log",
+        stderr=data_path + "{sample}/logs/{sample}_genotype_stderr.log"
+    shell:
+        """  
+        echo "Starting genotype for {wildcards.sample}" >> {log.stderr} && \
+        bash -c 'time bash {params.genotype_sh} {params.bam_path} {input} {params.tmp_tbl_file} {params.out_path} {params.filter} {params.mapq} {params.baseq} {params.parallel} > {log.stdout} 2>> {log.stderr} && \
+        bash {params.genotype_filter_sh} {params.genotype_all} {input} {params.vaf} >> {log.stdout} 2>> {log.stderr} ' 
+        """
+
+rule Annotation:
+    input:
+        data_path+"{sample}/mutation/results/variants/snp_vaf_final.vcf"
+    params:
+        vcfanno_coml_path="/codes/conf_test.toml",
+        threads=config["threads"],
+        genotype_path=data_path+"{sample}/genotype/genotype_all_filtered.tsv",
+        barcode_path=data_path+"{sample}/seurat/output_cell_barcodes.tsv",
+        annotation_sh="/codes/annotation.sh"
+    output:
+        data_path+"{sample}/genotype/all_final.tsv"
+    log:
+        stdout=data_path + "{sample}/logs/{sample}_annotation_stdout.log",
+        stderr=data_path + "{sample}/logs/{sample}_annotation_stderr.log"
+    shell:
+        """  
+        echo "Starting annotation for {wildcards.sample}" >> {log.stderr} && \
+        bash -c 'time bash {params.annotation_sh} {input} {params.vcfanno_coml_path} {params.genotype_path} {params.barcode_path} {params.threads} > {log.stdout} 2>> {log.stderr}' 
+        """
+
+rule Output:
+    input:
+        data_path+"{sample}/genotype/all_final.tsv"
+    params:
+        target_path=Get_fastq,
+        output_path=data_path+"{sample}",
+        threads=config["threads"],
+        output_sh="/codes/Output.sh"
+    output:
+        data_path+"{sample}/output_data.h5mu"
+    log:
+        stdout=data_path + "{sample}/logs/{sample}_output_stdout.log",
+        stderr=data_path + "{sample}/logs/{sample}_output_stderr.log"
+    shell:
+        """  
+        echo "Starting Output for {wildcards.sample}" >> {log.stderr} && \
+        bash -c 'time bash {params.output_sh} {params.target_path} {params.output_path} {params.threads} > {log.stdout} 2>> {log.stderr}' 
+        """
+

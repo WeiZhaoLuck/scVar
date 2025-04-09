@@ -1,0 +1,17 @@
+project:
+    <ProjectName>
+samples:
+    <SampleName1>: SamplePath1
+    <SampleName2>: SamplePath2
+result_path:
+    <results_path>
+SNV_filter_vaf:
+    100
+threads:
+    7
+genotype_filter:
+    0
+genotype_mapq:
+    0
+genotype_baseq:
+    0

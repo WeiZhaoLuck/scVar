@@ -1,0 +1,184 @@
+configfile: "config.yaml"
+###snakemake --dag | dot -Tsvg > dag.svg
+Result_path = config["result_path"]
+Project = config["project"]
+data_path = Result_path+"/"+Project+"/"
+rule all:
+    input:
+        expand(data_path+"{sample}/output_data.h5mu",sample=config["samples"]),
+        
+def Get_fastq(wildcards):
+    return config["samples"][wildcards.sample]
+rule Cellranger:
+    input:
+        fastqs=Get_fastq,
+        # fastqs=expand("/p300s/baoym_group/zhaow/projects/scVar/Data/E-MTAB-8410/{sample}",sample=config["samples"]),
+        preference="/reference"
+    params:
+        sample_name="{sample}",
+        out_dir=data_path+"{sample}/mapping",
+        parallel=config["threads"]
+    output:
+        temp(data_path+"{sample}/mapping/test.txt"),
+        # dir="/p300s/baoym_group/zhaow/projects/scVar/PipelineV2/snakemake/results_test"
+    log:
+        stdout=data_path + "{sample}/logs/{sample}_cellranger_stdout.log",
+        stderr=data_path + "{sample}/logs/{sample}_cellranger_stderr.log"
+    shell:
+        """  
+        echo "Starting cellranger for {params.sample_name}" >> {log.stderr} && \
+        cd {params.out_dir} &&\
+        bash -c 'time /opt/cellranger-7.1.0/cellranger count \
+        --id=run_count_{params.sample_name} --jobmode=local --localcores={params.parallel} \
+        --transcriptome={input.preference} --fastqs={input.fastqs} --sample={params.sample_name} --nosecondary \
+        > {log.stdout} 2>> {log.stderr} && touch test.txt ' 
+        """
+        # "cd {params.out_dir} && cellranger count --id=run_count_{params.sample_name} --jobmode=local --localmem=15 --nosecondary --transcriptome={input.preference} --fastqs={input.fastqs} --sample={params.sample_name} 2> {log} && touch test.txt"
+
+rule Soupx:
+    input:
+        first=data_path+"{sample}/mapping/test.txt",
+        R_script_soupx="/codes/test_soupx.r",
+        prepare_sh="/codes/prepare.sh"
+    params:
+        cellranger_out = data_path+"{sample}/mapping/run_count_{sample}/outs",
+    output:
+        temp(data_path+"{sample}/mapping/run_count_{sample}/outs/test_soup.txt")
+
+    log:
+        stdout=data_path + "{sample}/logs/{sample}_soupx_stdout.log",
+        stderr=data_path + "{sample}/logs/{sample}_soupx_stderr.log"
+    shell:
+        """  
+        echo "Starting soupx for {wildcards.sample}" >> {log.stderr} && \
+        bash -c 'time Rscript {input.R_script_soupx} {params.cellranger_out} > {log.stdout} 2>> {log.stderr} && \
+        bash {input.prepare_sh} {params.cellranger_out} >> {log.stdout} 2>> {log.stderr} && touch {output} ' 
+        """
+
+rule Seurat:
+    input:
+        first=data_path+"{sample}/mapping/run_count_{sample}/outs/test_soup.txt",
+        R_script_seurat="/codes/test.r",
+        seurat_end="/codes/seurat_end.sh",
+    params:
+        result_out=data_path+"{sample}/seurat",
+        result_all=data_path+"{sample}/mapping/run_count_{sample}/outs",
+        soupx_out=data_path+"{sample}/mapping/run_count_{sample}/outs/soupX_matrix"
+        # soupx_out="{sample}/run_count_{sample}/outs/soupX_matrix"
+    output:
+        data_path+"{sample}/seurat/output_cell_barcodes.tsv"
+    log:
+        stdout=data_path + "{sample}/logs/{sample}_seurat_stdout.log",
+        stderr=data_path + "{sample}/logs/{sample}_seurat_stderr.log"
+    shell:
+        """  
+        echo "Starting Seurat for {wildcards.sample}" >> {log.stderr} && \
+        bash -c 'time Rscript {input.R_script_seurat} {params.soupx_out} {params.result_out} > {log.stdout} 2>> {log.stderr} && \
+        bash {input.seurat_end} {output} {params.result_out}/barcodes_cell_type.tsv {params.result_out}/barcodes_cluster.tsv >> {log.stdout} 2>> {log.stderr} '
+        """
+
+
+rule Extract_bam:
+    input:
+        barcode_type=data_path+"{sample}/seurat/output_cell_barcodes.tsv",
+    params:
+        extract_sh="/codes/extract_bam_parallel.sh",
+        bam_path=data_path+"{sample}/mapping/run_count_{sample}/outs/possorted_genome_bam.bam",
+        threads=config["threads"],
+    output:
+        data_path+"{sample}/mapping/run_count_{sample}/outs/extracted.bam"
+    log:
+        stdout=data_path + "{sample}/logs/{sample}_extract_bam_stdout.log",
+        stderr=data_path + "{sample}/logs/{sample}_extract_bam_stderr.log"
+    shell:
+        """  
+        echo "Starting Extract_bam for {wildcards.sample}" >> {log.stderr} && \
+        bash -c 'time bash {params.extract_sh} {params.bam_path} {input.barcode_type} > {log.stdout} 2>> {log.stderr}'
+        """
+
+rule SNV_Calling:
+    input:
+        bam_file=data_path+"{sample}/mapping/run_count_{sample}/outs/extracted.bam",
+    params:
+        outdir=data_path+"{sample}/mutation/results/variants",
+        script="/codes/gatk_pipeline.sh"
+
+    output:
+        data_path+"{sample}/mutation/results/variants/variants.vcf"
+    log:
+        stdout=data_path + "{sample}/logs/{sample}_SNV_calling_stdout.log",
+        stderr=data_path + "{sample}/logs/{sample}_SNV_calling_stderr.log"
+    shell:
+        """  
+        echo "Starting SNV_calling for {wildcards.sample}" >> {log.stderr} && \
+        bash -c 'time bash {params.script} {input.bam_file} {params.outdir} > {log.stdout} 2>> {log.stderr}'  
+        """
+
+
+rule Genotype:
+    input:
+        data_path+"{sample}/mutation/results/variants/variants.vcf"
+    params:
+        genotype_sh="/codes/Genotyping.sh",
+        genotype_filter_sh="/codes/Genotype_Mutations_filter.sh",
+        out_path=data_path+"{sample}/genotype/genotype",
+        bam_path=data_path+"{sample}/mapping/run_count_{sample}/outs/extracted.bam",
+        barcode_all=data_path+"{sample}/seurat/barcodes.csv",
+        tmp_tbl_file=data_path+"{sample}/genotype/tbl",
+        filter=config["genotype_filter"],
+        mapq=config["genotype_mapq"],
+        baseq=config["genotype_baseq"],
+        parallel=config["threads"],
+        vaf=config["SNV_filter_vaf"],
+        genotype_all=data_path+"{sample}/genotype/genotype_all.tsv"
+        # sniffer="/p300s/baoym_group/zhaow/projects/scVar/PipelineV2/genptype_parallel/scripts/genotype.py"
+    output:
+        data_path+"{sample}/mutation/results/variants/snp_vaf_final.vcf"
+    log:
+        stdout=data_path + "{sample}/logs/{sample}_genotype_stdout.log",
+        stderr=data_path + "{sample}/logs/{sample}_genotype_stderr.log"
+    shell:
+        """  
+        echo "Starting genotyping for {wildcards.sample}" >> {log.stderr} && \
+        bash -c 'time bash {params.genotype_sh} {params.bam_path} {input} {params.tmp_tbl_file} {params.out_path} {params.filter} {params.mapq} {params.baseq} {params.parallel} > {log.stdout} 2>> {log.stderr} && \
+        bash {params.genotype_filter_sh} {params.genotype_all} {input} {params.vaf} >> {log.stdout} 2>> {log.stderr} ' 
+        """
+
+rule Annotation:
+    input:
+        data_path+"{sample}/mutation/results/variants/snp_vaf_final.vcf"
+    params:
+        vcfanno_coml_path="/codes/conf_test.toml",
+        threads=config["threads"],
+        genotype_path=data_path+"{sample}/genotype/genotype_all_filtered.tsv",
+        barcode_path=data_path+"{sample}/seurat/barcodes_type.csv",
+        annotation_sh="/codes/annotation.sh"
+    output:
+        data_path+"{sample}/genotype/all_final.tsv"
+    log:
+        stdout=data_path + "{sample}/logs/annotation_stdout.log",
+        stderr=data_path + "{sample}/logs/annotation_stderr.log"
+    shell:
+        """  
+        echo "Starting Annotation for {wildcards.sample}" >> {log.stderr} && \
+        bash -c 'time bash {params.annotation_sh} {input} {params.vcfanno_coml_path} {params.genotype_path} {params.barcode_path} {params.threads} > {log.stdout} 2>> {log.stderr}' 
+        """
+
+rule Output:
+    input:
+        data_path+"{sample}/genotype/all_final.tsv"
+    params:
+        target_path=Get_fastq,
+        output_path=data_path+"{sample}",
+        threads=3,
+        output_sh="/codes/Output.sh"
+    output:
+        data_path+"{sample}/output_data.h5mu"
+    log:
+        stdout=data_path + "{sample}/logs/{sample}_output_stdout.log",
+        stderr=data_path + "{sample}/logs/{sample}_output_stderr.log"
+    shell:
+        """  
+        echo "Starting Output for {wildcards.sample}" >> {log.stderr} && \
+        bash -c 'bash {params.output_sh} {params.target_path} {params.output_path} {params.threads} > {log.stdout} 2>> {log.stderr}' 
+        """
