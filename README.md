@@ -94,10 +94,10 @@ docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <da
 ```
 - `<project_path>`: Path to the project directory.
 - `<sample_name>`: Name of the sample to analyze.
-- `--method`: Method for clustering (options: `var1`, `var2`, `TF_IDF`, default: `var1`).  
+- `--method`: Method for selecting features (options: `var1`, `var2`, `TF_IDF`, default: `var1`).  
 - `--flag`: Flag for clustering (options: `0`, `1`, default: `0`).  
-- `--number`: Number of clusters (integer, default: `100`).  
-- `--clustermethod`: Clustering method (options: `ward.D`, `ward.D2`, `single`, `complete`, `average`, `mcquitty`, `median`, `centroid`, default: `average`).  
+- `--number`: Number of features for clustering (integer, default: `100`).  
+- `--clustermethod`: Method for clustering (options: `ward.D`, `ward.D2`, `single`, `complete`, `average`, `mcquitty`, `median`, `centroid`, default: `average`).  
 
 ### 4. GO and Oncogenic Pathway
 ```shell
@@ -105,8 +105,8 @@ docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <da
 ```
 - `<project_path>`: Path to the project directory.
 - `<sample_name>`: Name of the sample to analyze.
-- `--pCutoff`: P-value cutoff for GO analysis (default: 0.05).
-- `--qCutoff`: Q-value cutoff for GO analysis (default: 0.2).
+- `--pCutoff`: P-value cutoff for GO analysis (default: `0.05`).
+- `--qCutoff`: Q-value cutoff for GO analysis (default: `0.2`).
 
 ### 5. Psedutime Analysis
 ```shell
