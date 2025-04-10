@@ -5,9 +5,7 @@ scVar:
 Install
 ===========
 
-
-![Docker Pulls](https://img.shields.io/badge/Docker%20Pulls-scvar-blue?style=plastic&logo=docker&logoColor=white)  
-
+[![Docker Pulls](https://img.shields.io/badge/Docker%20Pulls-scvar-blue?style=plastic&logo=docker&logoColor=white)](https://hub.docker.com/repository/docker/zhaoweirepository/scvar/general) 
 
 Dependency data
 ===========
@@ -50,15 +48,15 @@ samples:
 result_path:
     <results_path> # Path to save the results
 SNV_filter_vaf:
-    100
+    <VAF> # VAF filter for SNV
 threads:
-    7
+    <number> # Number of threads to use
 genotype_filter:
-    0
+    <reads> #Minimum number of reads required per barcode
 genotype_mapq:
-    0
+    <mapq> # Minimum mapping quality for genotype filtering
 genotype_baseq:
-    0
+    <baseq> # Minimum base quality for genotype filtering
 ```
 ### 2. Copy Snakefile
 Copy a snakefile file in the `<results_path>` directory.
