@@ -5,7 +5,8 @@ scVar:
 Install
 ===========
 
-![Docker Pulls](https://img.shields.io/docker/pulls/zhaoweirepository/scvar?style=plastic&label=Docker%20Pulls&logo=docker&logoColor=white&color=blue)
+
+![Docker Pulls](https://img.shields.io/badge/Docker%20Pulls-scvar-blue?style=plastic&logo=docker&logoColor=white)  
 
 
 Dependency data
@@ -30,7 +31,10 @@ If you are providing raw sequencing data, ensure the FASTQ files are named accor
 If you are skipping upstream analysis, prepare the following processed files:
 - **BAM files**: Ensure the BAM files are named according to the following convention and move the files to the `<data_path>` directory, like : `./Demo/Processed/*.bam`
 - **h5ad files**: Ensure the h5ad files are named according to the following convention and move the files to the `<data_path>` directory, like : `./Demo/Processed/*.h5ad`
-- **Seurat files**: Ensure the Seurat files are named according to the following convention and move the files to the `<data_path>` directory, like : `./Demo/Processed/*.rds`
+- **rds files**: Ensure the Seurat files are named according to the following convention and move the files to the `<data_path>` directory, like : `./Demo/Processed/*.rds`
+
+Only one of either the h5ad file or the rds file is needed.
+
 
 ## Run scVar
 ### 1. Setup Configuration
@@ -125,7 +129,7 @@ For detailed information on inputs, outputs, scripts, and parameters of each mod
 
 ## Example Demo
 ### Preparatory work
-- **Copy Input Files**: Copy files from either `./Demo/Raw/` or `./Demo/Processed/` to the <data_path> directory.
+- **Copy Input Files**: Copy files from either `./Demo/Raw/` or `./Demo/Processed/` to the <data_path> directory. Add that if copying files from `./Demo/Processed/`, only one of either the h5ad or rds files needs to be copied.
 - **Copy Configuration File**: If you copy data from `./Demo/Raw/`, copy `./Demo/Raw_config/config.yaml` and `./Demo/Raw_config/Snakefile` to the `<results_path>` directory. If you copy data from `./Demo/Processed/`, copy `./Demo/Processed_config/config.yaml` and `./Demo/Processed_config/Snakefile` to the `<results_path>` directory.
 
 
@@ -135,7 +139,7 @@ For detailed information on inputs, outputs, scripts, and parameters of each mod
 docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && cd /results && snakemake --cores 1'
 ```
 #### Output:
-
+A h5mu file containing transcriptome and mutation information in the <results_path> folder.
 
 ### Upstream Analysis
 #### 1. Mutation signature,TMB,Entropy and Simpson's Index
@@ -144,7 +148,7 @@ docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <da
 docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && bash /codes/Analysis_SigTMBEntroy.sh /results/Example Demo'
 ```
 #### Output:
-- **Cosimc Files**: 
+- **Cosimc Files**:  The mutation spectrum results of all cells and different cell types, output similar to:
 
 |  Signature   | Similarity  |
 |  ----  | ----  |
@@ -154,7 +158,7 @@ docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <da
 | SBS93  | 0.081081407813563 |
 | unknown  | 0.178191540110529 |
 
-- **TMB File**: 
+- **TMB File**: The TMB results of all cells and different cell types, output similar to:
 
 ```txt
 Total length of Endothelium qualifying regions: 672240
@@ -168,7 +172,7 @@ Mutations count of All: 41
 TMB of All qualifying regions: 13.43623523243048386832
 ```
 
-- **Entropy and Simpson's Index File**:
+- **Entropy and Simpson's Index File**: The results of the  entropy and Simpson's index for each mutation, output similar to:
 
 |  mutation_id   | entropy  | simpson|
 |  ----  | ----  | ----  |
@@ -182,7 +186,9 @@ TMB of All qualifying regions: 13.43623523243048386832
 docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && bash /codes/Calculate_Specific_Mutations.sh /results/Example Demo'
 ```
 
-#### Output:
+#### Output: 
+
+The cluster-specific and cell type-specific mutations, output similar to:
 
 |  SNV_label   | p-adjusted  | pvalue| odd_ratio| ref_label1| ref_label2|alt_label1| alt_label2|
 |  ----  | ----  | ----  |----  |----  |----  |----  |----  |
@@ -197,6 +203,7 @@ docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_
 ```
 
 #### Output:
+The results of cell clustering based on mutations, similar to:
 <img src="Demo/Results/MutationCluster/heatmap_final_00.png" alt="Mutation Cluster" width="500" height="300">
 
 #### 4. GO and Oncogenic Pathway
@@ -205,10 +212,12 @@ docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_
 docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && bash /codes/GOonco.sh --path /results/Example --sample Demo  --pCutoff 0.05 --qCutoff 0.2'
 ```
 #### Output:
-|  ONTOLOGY   | p-adjusted  | pvalue| odd_ratio| ref_label1| ref_label2|alt_label1| alt_label2|
-|  ----  | ----  | ----  |----  |----  |----  |----  |----  |
-| 3_65841633_C_T  | 0.008425429478061056 | 1.7268763021236024e-06 |0 |30 |3 |0 |8 |
-| 6_154407634_G_A  | 0.03473458736616632 | 5.695361732513436e-05 |0.01 |30 |2 |1 |6 |
+GO and oncogenic pathway enrichment results for all cells and different cell types, output similar to:
+
+|  ONTOLOGY   | ID  | Description| GeneRatio| BgRatio| pvalue|p.adjust| qvalue| geneID| Count| GeneRatio_Value| Sample|
+|  ----  | ----  | ----  |----  |----  |----  |----  |----  |----  |----  |----  |----  |
+| BP  | GO:0051236 | establishment of RNA localization |15/446 |161/18870 |6.72123269110434e-06 |0.0267773910413597 |0.0248190360846253 |472/9688/55308/3837/87178/8480/8563/7884/9908/51808/4869/9972/348995/8658/7013 |15 |0.0336322869955157 |Alveolar_cell |
+| BP  | GO:0006403 | RNA localization |16/446 |197/18870 |1.90948363386813e-05 |0.0380369139866531 |0.0352550978295232 |472/9688/55308/3837/87178/10574/8480/8563/7884/9908/51808/4869/9972/348995/8658/7013 |16 |0.0358744394618834 |Alveolar_cell |
 
 
 
@@ -218,6 +227,8 @@ docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_
 docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && bash /codes/Pseudotime.sh --path /results/Example --sample Demo --mutation 7_6004027_A_G,12_25245350_C_G,17_47592542_A_G,22_20708085_C_T,2_28942361_C_A,3_49684128_A_C,3_49684173_G_A,3_49684565_A_G,7_56116040_A_C,9_137717161_G_T,9_137717162_C_A,X_100662268_C_G'
 ```
 #### Output:
+
+Pseudotime analysis results with highlighted mutated cells, similar to:
 <img src="Demo/Results/Pseudotime/12_25245350_C_G.png" alt="Pseudotime Analysis" width="800" height="300">
 
 #### 6. Statistic
