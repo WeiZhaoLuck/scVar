@@ -1,10 +1,10 @@
 project:
     <ProjectName>
 samples:
-    <SampleName1>: SamplePath1
-    <SampleName2>: SamplePath2
+    <SampleName1>: /data/<SampleName1>
+    <SampleName2>: /data/<SampleName2>
 result_path:
-    <results_path>
+    /results
 SNV_filter_vaf:
     100
 threads:

@@ -1,4 +1,4 @@
-scVar:
+scVar: Joint analysis of expression and variation at single cell resolution
 ===========
 
 
@@ -9,9 +9,7 @@ Install
 
 Dependency data
 ===========
-The dependency data can be downloaded from these links and should be placed in the <reference_path> folder.
-- **Vep**:
-- **Annovar**:
+The dependency data can be downloaded from FTP link: `ftp://download.big.ac.cn/baoym_group/zhaowei/reference.tar.gz` and should be placed in the <reference_path> folder.
 
 
 Usage
@@ -22,21 +20,23 @@ Please prepare the input files in advance. Follow the instructions below based o
 ### 1. Raw Data (FASTQ Files)
 If you are providing raw sequencing data, ensure the FASTQ files are named according to the following convention and move the files  to the `<data_path>` directory, like : `./Demo/Raw/*.fastq.gz`
 
-[SampleName]S1_L00[LaneNumber][ReadType]_001.fastq.gz  
+[SampleName]_S1_L00[LaneNumber][ReadType]_001.fastq.gz  
+
+If you are providing raw sequencing data, ensure the FASTQ files are named according to the following convention and move the files to the `<data_path>` directory, e.g., `./Demo/Raw/*.fastq.gz`. Specifically, rename the original sequencing files to `[SampleName]_S1_L00[LaneNumber][ReadType]_001.fastq.gz` and place them into a folder named SampleName under the `<data_path>` directory (i.e., `<data_path>/<SampleName>/`).
 
 ### 2. Processed Data (BAM, h5ad, or rds Files)
 
 If you are skipping upstream analysis, prepare the following processed files:
-- **BAM files**: Ensure the BAM files are named according to the following convention and move the files to the `<data_path>` directory, like : `./Demo/Processed/*.bam`
-- **h5ad files**: Ensure the h5ad files are named according to the following convention and move the files to the `<data_path>` directory, like : `./Demo/Processed/*.h5ad`
-- **rds files**: Ensure the Seurat files are named according to the following convention and move the files to the `<data_path>` directory, like : `./Demo/Processed/*.rds`
+- **BAM files**: Ensure the BAM files are named according to the following convention and move the files to the `<data_path>/<SampleName>/` directory, like : `./Demo/Processed/*.bam`
+- **h5ad files**: Ensure the h5ad files are named according to the following convention and move the files to the `<data_path>/<SampleName>/` directory, like : `./Demo/Processed/*.h5ad`
+- **rds files**: Ensure the Seurat files are named according to the following convention and move the files to the `<data_path>/<SampleName>/` directory, like : `./Demo/Processed/*.rds`
 
 Only one of either the h5ad file or the rds file is needed.
 
 
 ## Run scVar
 ### 1. Setup Configuration
-Create a configuration file `./scVar/config.yaml` in the `<results_path>` directory. This file should contain the following information:
+Create a configuration file `config.yaml` in the `<results_path>` directory. This file should contain the following information:
 
 ```yaml
 # Configuration file for scVar analysis
@@ -44,9 +44,10 @@ Create a configuration file `./scVar/config.yaml` in the `<results_path>` direct
 project:
     <ProjectName> # Project name
 samples:
-    <SampleName>: SamplePath # Sample name and path to the sample data
+    <SampleName1>: /data/<SampleName1> # Sample name and path to the sample data
+    <SampleName2>: /data/<SampleName2>
 result_path:
-    <results_path> # Path to save the results
+    /results # Path to save the results
 SNV_filter_vaf:
     <VAF> # VAF filter for SNV
 threads:
@@ -58,14 +59,16 @@ genotype_mapq:
 genotype_baseq:
     <baseq> # Minimum base quality for genotype filtering
 ```
+In this configuration file, all fields wrapped in angle brackets (< >) are placeholders and must be manually replaced with your own values (e.g., \<ProjectName>, \<SampleName>, \<VAF>, \<number>, \<reads>, \<mapq>, \<baseq>). The paths /data and /results refer to fixed directories inside the Docker container and therefore do not need to be changed—you only need to adjust the sample names and parameter values while keeping these container paths intact.
+
 ### 2. Copy Snakefile
 Copy a snakefile file in the `<results_path>` directory.
-- **For Raw Data**: Copy `./scVar/Snakefile_Raw` and rename it to Snakefile.
-- **For Processed Data**: Copy `./scVar/Snakefile` and rename it to Snakefile.
+- **For Raw Data**: Copy `./scVar/Snakefile_Raw` to your `<results_path>` and rename it to Snakefile.
+- **For Processed Data**: Copy `./scVar/Snakefile` to your `<results_path>` and rename it to Snakefile.
 
 ### 3. Run scVar
 ```shell
-docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && cd <results_path> && snakemake --cores <cores_number>'
+docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <data_path>:/data scvar /bin/bash -c 'source /opt/miniconda/bin/activate scVar && cd /results && snakemake --cores <cores_number>'
 ```
 
 - `<reference_path>`: Path to the reference genome directory.
@@ -238,4 +241,7 @@ docker run -it <reference_path>:/reference -v <results_path>:/results  -v <data_
 #### Output:
 A report file will be generated. 
 
-## Citation:
+## Citation: 
+bioRxiv 2025.10.12.681753; doi: https://doi.org/10.1101/2025.10.12.681753
+
+
