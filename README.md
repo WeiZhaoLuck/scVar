@@ -141,6 +141,9 @@ docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <da
 ```
 #### Output:
 A h5mu file containing transcriptome and mutation information in the <results_path> folder.
+The result image is similar to the figure below:
+
+<img src="Demo/Results/Statistics/embedding_plot-1.png" alt="celltype" width="450" height="150">
 
 ### Upstream Analysis
 #### 1. Mutation signature,TMB,Entropy and Simpson's Index
@@ -159,6 +162,9 @@ docker run -it -v <reference_path>:/reference -v <results_path>:/results  -v <da
 | SBS93  | 0.081081407813563 |
 | unknown  | 0.178191540110529 |
 
+The result image is similar to the figure below:
+<img src="Demo/Results/Statistics/cosmic_stacked_by_celltype.png" alt="Cosmic" width="700" height="300">
+
 - **TMB File**: The TMB results of all cells and different cell types, output similar to:
 
 ```txt
@@ -172,7 +178,8 @@ Total length of All qualifying regions: 3051450
 Mutations count of All: 41
 TMB of All qualifying regions: 13.43623523243048386832
 ```
-
+The result image is similar to the figure below:
+<img src="Demo/Results/Statistics/TMB_by_celltype.png" alt="TMB" width="500" height="300">
 - **Entropy and Simpson's Index File**: The results of the  entropy and Simpson's index for each mutation, output similar to:
 
 |  mutation_id   | entropy  | simpson|
@@ -196,6 +203,8 @@ The cluster-specific and cell type-specific mutations, output similar to:
 | 3_65841633_C_T  | 0.008425429478061056 | 1.7268763021236024e-06 |0 |30 |3 |0 |8 |
 | 6_154407634_G_A  | 0.03473458736616632 | 5.695361732513436e-05 |0.01 |30 |2 |1 |6 |
 
+The result image is similar to the figure below:
+<img src="Demo/Results/Statistics/Epithelial_cells.png" alt="forest" width="350" height="200">
 
 #### 3. Mutation Clustering
 
@@ -220,7 +229,8 @@ GO and oncogenic pathway enrichment results for all cells and different cell typ
 | BP  | GO:0051236 | establishment of RNA localization |15/446 |161/18870 |6.72123269110434e-06 |0.0267773910413597 |0.0248190360846253 |472/9688/55308/3837/87178/8480/8563/7884/9908/51808/4869/9972/348995/8658/7013 |15 |0.0336322869955157 |Alveolar_cell |
 | BP  | GO:0006403 | RNA localization |16/446 |197/18870 |1.90948363386813e-05 |0.0380369139866531 |0.0352550978295232 |472/9688/55308/3837/87178/10574/8480/8563/7884/9908/51808/4869/9972/348995/8658/7013 |16 |0.0358744394618834 |Alveolar_cell |
 
-
+The result image is similar to the figure below:
+<img src="Demo/Results/Statistics/GO.png" alt="GO" width="400" height="300">
 
 #### 5. Psedutime Analysis
 
