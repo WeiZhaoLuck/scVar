@@ -257,5 +257,5 @@ A report file will be generated.
 
 ## Citation: 
 bioRxiv 2025.10.12.681753; doi: https://doi.org/10.1101/2025.10.12.681753
-
+CNCB–NGDC Members and Partners. Database resources of the National Genomics Data Center, China National Center for Bioinformation in 2026. Nucleic Acids Res. 2026 Jan 6;54(D1):D28-D47. doi: 10.1093/nar/gkaf1172IF: 13.1 Q1 . PMID: 41359036; PMCID: PMC12807729.
 
