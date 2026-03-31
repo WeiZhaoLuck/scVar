@@ -1,0 +1,69 @@
+#docm
+[[annotation]]
+file="/reference/annotation/docm/variants_DoCM_GRCh38_copy_sorted.vcf.gz"
+fields=["DISEASE","PMID"]
+names=["DOCM_DISEASE","PMID"]
+ops=["self","self"]
+
+# cancerhotspot
+[[annotation]]
+file="/reference/annotation/cancerhotspots/cancerhotspots_GRCh38_v2_final.vcf.gz"
+# the special name 'ID' pulls out the rs id from the VCF
+fields = ["cancerhotsports_Hugo_Symbol","cancerhotsports_Variant_Classification","cancerhotsports_Variant_Type","cancerhotsports_dbSNP_RS","cancerhotsports_HGVSc","cancerhotsports_HGVSp","cancerhotsports_HGVSp_Short","cancerhotsports_Exon_Number","cancerhotsports_Gene","cancerhotsports_Feature","cancerhotsports_Feature_type","cancerhotsports_Consequence","cancerhotsports_IMPACT","cancerhotsports_VARIANT_CLASS","cancerhotsports_TUMORTYPE","cancerhotsports_Amino_Acid_Change","cancerhotsports_oncotree_organtype","cancerhotsports_oncotree_parent","cancerhotsports_oncotree_detailed","SNV_Tumer_TotalCounts","SNV_Tumer_Counts"]
+names = ["cancerhotsports_Hugo_Symbol","cancerhotsports_Variant_Classification","cancerhotsports_Variant_Type","cancerhotsports_dbSNP_RS","cancerhotsports_HGVSc","cancerhotsports_HGVSp","cancerhotsports_HGVSp_Short","cancerhotsports_Exon_Number","cancerhotsports_Gene","cancerhotsports_Feature","cancerhotsports_Feature_type","cancerhotsports_Consequence","cancerhotsports_IMPACT","cancerhotsports_VARIANT_CLASS","cancerhotsports_TUMORTYPE","cancerhotsports_Amino_Acid_Change","cancerhotsports_oncotree_organtype","cancerhotsports_oncotree_parent","cancerhotsports_oncotree_detailed","cancerhotspot_SNV_Tumer_TotalCounts","cancerhotspot_SNV_Tumer_Counts"]
+ops=["first", "first", "first", "first", "first", "first", "first", "first", "first", "first", "first", "first","first","first", "first", "first", "first", "first", "first", "first", "first"]
+
+
+# CIVIC
+[[annotation]]
+file="/reference/annotation/civic/nightly-civic_accepted_and_submitted_GRCh38_sorted.vcf.gz"
+# the special name 'ID' pulls out the rs id from the VCF
+fields = ["CSQ"]
+names = ["CIVIC_CSQ"]
+ops=["first"]
+
+
+# COSMIC coding
+[[annotation]]
+file="/reference/annotation/cosmic/CosmicCodingMuts.vcf.gz"
+# the special name 'ID' pulls out the rs id from the VCF
+fields = ["ID","GENE","STRAND","LEGACY_ID","CDS","AA","HGVSC","HGVSG","CNT"]
+names = ["COS_CODING_ID","COS_CODING_Gene_name","COS_CODING_STRAND","COS_CODING_GENOMIC_ID","COS_CODING_LEGACY_ID","COS_CODING_CDS","COS_CODING_AA","COS_CODING_HGVSC","COS_CODING_HGVSP","COS_CODING_HGVSG","COS_CODING_CNT"]
+ops=["first","first","first","first","first","first","first","first","first"]
+
+# COSMIC noncoding
+[[annotation]]
+file="/reference/annotation/cosmic/CosmicNonCodingVariants.vcf.gz"
+# the special name 'ID' pulls out the rs id from the VCF
+fields = ["ID","GENE","STRAND","LEGACY_ID","CNT"]
+names = ["COS_CODING_ID","COS_CODING_Gene_name","COS_CODING_STRAND","COS_CODING_LEGACY_ID","COS_CODING_CNT"]
+ops=["first","first","first","first","first"]
+
+# CGI
+[[annotation]]
+file="/reference/annotation/cgi_biomarker/cgi-main/onco_muts_sorted.bed.gz"
+columns=[6,7,8,9,10]
+names=["in_cgi", "cgi_mutation_type", "cgi_cancer_types", "cgi_abbreviations", "cgi_reported_by"]
+ops=["flag", "self", "self", "self", "self"]
+
+[[annotation]]
+file="/reference/annotation/cgi_biomarker/cgi-main/ccg_sorted.bed.gz"
+columns=[4,5,6,7,8,9,10]
+names=["cgi_gene", "cgi_gene_tumorigenesis", "cgi_gene_alterations", "cgi_gene_translocations", "cgi_gene_cancer_types", "cgi_gene_abbreviations", "cgi_gene_sources"]
+ops=["self", "self", "self", "self", "self", "self", "self"]
+
+# BRCA
+[[annotation]]
+file="/reference/annotation/vicc/brca_final_38_sorted_V2.vcf.gz"
+# the special name 'ID' pulls out the rs id from the VCF
+fields = ["brca_geneSymbol","brca_variant_nomenclature_reference_cDNA_sequence","brca_variant_nomenclature_HGVS_nucleotide","brca_variant_nomenclature_BIC_designation","brca_variant_nomenclature_genome","brca_variant_nomenclature_RNA_LOVD","brca_variant_nomenclature_synonyms","brca_variant_nomenclature_pathogenicity_all","brca_variant_nomenclature_clinical_significance","brca_variant_nomenclature_variant_haplotype","brca_ENIGMA_clinical_significance_citation","brca_ENIGMA_allel_origin","brca_ClinVar_SCV_accession","brca_ClinVar_DBID_LOVD","brca_ClinVar_BIC_Nomenclature"]
+names =["brca_geneSymbol","brca_variant_nomenclature_reference_cDNA_sequence","brca_variant_nomenclature_HGVS_nucleotide","brca_variant_nomenclature_BIC_designation","brca_variant_nomenclature_genome","brca_variant_nomenclature_RNA_LOVD","brca_variant_nomenclature_synonyms","brca_variant_nomenclature_pathogenicity_all","brca_variant_nomenclature_clinical_significance","brca_variant_nomenclature_variant_haplotype","brca_ENIGMA_clinical_significance_citation","brca_ENIGMA_allel_origin","brca_ClinVar_SCV_accession","brca_ClinVar_DBID_LOVD","brca_ClinVar_BIC_Nomenclature"]
+ops=["first","first","first","first","first","first","first","first","first","first","first","first","first","first","first"]
+
+# clinivar
+[[annotation]]
+file="/reference/annotation/clinvar/clinvar.vcf.gz"
+# the special name 'ID' pulls out the rs id from the VCF
+fields = ["ALLELEID","CLNDN","CLNDNINCL","CLNDISDBINCL","CLNHGVS","CLNREVSTAT","CLNSIG","CLNSIGCONF","CLNSIGINCL","CLNVC","CLNVCSO","CLNVI","DBVARID","GENEINFO","MC","ORIGIN","RS","SSR"]
+names =["clinivar_ALLELEID","clinivar_CLNDN","clinivar_CLNDNINCL","clinivar_CLNDISDBINCL","clinivar_CLNHGVS","clinivar_CLNREVSTAT","clinivar_CLNSIG","clinivar_CLNSIGCONF","clinivar_CLNSIGINCL","clinivar_CLNVC","clinivar_CLNVCSO","clinivar_CLNVI","clinivar_DBVARID","clinivar_GENEINFO","clinivar_MC","clinivar_ORIGIN","clinivar_RS","clinivar_SSR"]
+ops=["first","first","first","first","first","first","first","first","first","first","first","first","first","first","first","first","first","first"]

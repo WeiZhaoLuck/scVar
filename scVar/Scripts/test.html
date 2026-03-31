@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <title>Pie Chart Example</title> -->
+    <!-- 引入 ECharts 库 -->
+    <script src="./sources/echarts.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script> -->
+    <script src="./sources/highcharts.js"></script>
+    <script src="./sources/accessibility.js"></script>
+    <!-- <script src="https://code.highcharts.com/highcharts.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script> -->
+    <script src="./sources/vue.js"></script>
+    <!-- <script src="./sources/vue.js"></script> -->
+    <!-- <script src="https://unpkg.com/vue/dist/vue.js"></script> -->
+    <!-- 引入 http-vue-loader -->
+    <script src="./sources/httpVueLoader.js"></script>
+    <script src="./sources/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial;
+        }
+    
+        /* Style the tab */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+    
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+    
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+    
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+    
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+    </style>
+    <link rel="stylesheet" href="./sources/all.min.css" />
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="Title_side">Links</div>
+        <div class="sider_body">
+            <ul>
+                <li>
+                    <a href="#section1">1. Overview</a>
+                </li>
+                <li>
+                    <a href="#section2">2. Cell overview</a>
+                </li>
+
+                <li>
+                    <a href="#section3">3. Bam statistic</a>
+                </li>
+
+                <li>
+                    <a href="#section4">4. Mutation signature</a>
+                </li>
+
+                <li>
+                    <a href="#section5">5. Top mutations</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="container">
+    <!-- 容纳 ECharts 图表的 div 元素 -->
+    <script src="./sources/echarts.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script> -->
+    <!-- <script src="https://code.highcharts.com/highcharts.js"></script> -->
+    <script src="./sources/highcharts.js"></script>
+    <!-- <div id="pieChart" style="width: 600px; height: 400px;"></div> -->
+    <!-- 引入绘制饼状图的 JavaScript 代码 -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script> -->
+    <script src="./data/data.json"></script>
+    <script src="./data/output.json"></script>
+    <script src="./data/output_table_data.json"></script>
+    <script src="./data/output_table_data_cell.json"></script>
+    <script src="./data/output_pie_cell_type.json"></script>
+    <script src="./data/output_bam_data.json"></script>
+    <script src="./data/output_table_data_top20.json"></script>
+    <script src="./sources/jquery-3.6.0.min.js"></script>
+    <!-- <script src="html_get.js"></script> -->
+    <script src="./sources/output_table_data_cosmic_info.json"></script>
+    <!-- <script src="table_anno.js"></script> -->
+    <script src="./data/output_cell_data_count.json"></script>
+    <div id="app_t">
+        <section id="section1">
+            <p class="title" style="font-size: 25px; font-weight:bold;"> 1. Overview
+                <span class="info-icon" @mouseenter="showInfo(0)" @mouseleave="hideInfo(0)">
+                    <!-- <i class="fas fa-info-circle"></i> -->
+                    <img src="./sources/circle-info-solid.svg" alt="Icon" style="width:20px;height:20px;" />
+                </span>
+            </p>
+            <div class="tooltip" v-show="activeInfoIndex === 0">
+                {{ items[0].info }}
+            </div>
+        </section>
+    </div>
+    <table id="myTable" border="1" class="myTable">
+        <tr>
+        </tr>
+    </table>
+    <script src="./scripts/table_overview.js"></script>
+    <div id="app_1">
+        <section id="section2">
+            <p class="title" style="font-size: 25px; font-weight:bold;"> 2. Cell overview
+                <span class="info-icon" @mouseenter="showInfo(1)" @mouseleave="hideInfo(1)">
+                    <img src="./sources/circle-info-solid.svg" alt="Icon" style="width:20px;height:20px;" />
+                </span>
+            </p>
+            <div class="tooltip" v-show="activeInfoIndex === 1">
+                {{ items[1].info }}
+            </div>
+        </section>
+    </div>
+    <!-- <p class="title" style="font-size: 25px; font-weight:bold;"> 2. Cell overview</p> -->
+    <table id="myTable2" border="1" class="myTable">
+        <tr>
+        </tr>
+    </table>
+    <style>
+        #app {
+            position: relative;
+            padding: 20px;
+        }
+
+        .myTable {
+            margin: auto;
+            border-radius: 5px;
+            font-size: 12px;
+            border: none;
+            border-collapse: collapse;
+            max-width: 100%;
+            white-space: nowrap;
+            word-break: keep-all;
+            width: 60%;
+        }
+
+        .myTable th {
+            text-align: left;
+            font-size: 20px;
+        }
+
+        .myTable tr {
+            display: table-row;
+            vertical-align: inherit;
+            border-color: inherit;
+        }
+
+        .myTable tr:hover td {
+            background: #47B5FF;
+            color: #F8F8F8;
+        }
+
+        .myTable td,
+        .myTable th {
+            border-style: none;
+            border-top: 1px solid #dbdbdb;
+            border-left: 1px solid #dbdbdb;
+            border-bottom: 3px solid #dbdbdb;
+            border-right: 1px solid #dbdbdb;
+            padding: .5em .55em;
+            font-size: 15px;
+            text-align: center;
+            position: relative;
+        }
+
+        .myTable td {
+            border-style: none;
+            font-size: 15px;
+            vertical-align: center;
+            border-bottom: 1px solid #dbdbdb;
+            border-left: 1px solid #dbdbdb;
+            border-right: 1px solid #dbdbdb;
+            height: 30px;
+        }
+
+        .myTable tr:nth-child(even) {
+            background: #F8F8F8;
+        }
+        .container {
+            margin-left: auto;
+            margin-right: 3%;
+            max-width: 80%;
+            /* margin: 0 auto; */
+
+        }
+        .tabbutton:hover {
+            background-color: #47B5FF;
+        }
+        .tabbutton:active {
+            background-color: #dbdbdb;
+        }
+        .tabs {
+            /* display: flex; */
+            gap: 10px; /* 设置按钮之间的水平间距 */
+            max-width: 80%;
+            margin: 0 auto;
+        }
+        .image {
+            margin-top: 50px;
+            height: 580px;
+        }
+        .table-container {
+            width: 100%; /* 设置表格容器宽度 */
+            overflow-x: scroll; /* 添加水平滚动条 */
+        }
+            /* 定义表格外层包裹器样式 */
+        .table-wrapper {
+            width: 1000px; /* 设置表格内容的宽度，以便产生水平滚动条 */
+        }
+        button {
+            padding: 1px 2px;
+            background-color: #ffffff;
+            color: #47B5FF;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        /* 鼠标悬停样式 */
+        button:hover {
+            background-color: #47B5FF;
+        }
+        .fade-enter-active, .fade-leave-active {
+            transition: opacity 0.5s;
+        }
+        .fade-enter, .fade-leave-to {
+            opacity: 0;
+        }
+        .filter-panel {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .filter-panel button {
+            background-color: #47B5FF;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .filter-item{
+            margin-top: 5px;
+        }
+        .info-icon {
+            position: relative;
+            cursor: pointer;
+        }
+        .tooltip {
+            display: flex;
+            position: relative;
+            margin-top: 1%;
+            margin-bottom:1%;
+            margin-left: 1%;
+            max-width: 25%;
+            width: auto;
+            background-color: #c9ccce;
+            border: 1px solid #fff;
+            border-radius: 5px;
+            padding: 10px;
+            opacity: 0.5;
+            /* overflow: auto;  */
+            /* display: none; */
+            /* other */
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        .info-icon_new {
+            position: relative;
+            cursor: pointer;
+            width: 2px;
+        }
+        .popup {
+            position: relative;
+            cursor: pointer;
+            /* display: inline-block; */
+        }
+        .popup-overlay{
+            position: absolute;
+            top: 30px; /* 调整位置使内容框在表头上方 */
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 100%; /* 限制内容框在页面80%区域内 */
+            z-index: 9999; /* 确保内容框位于最上层 */
+            /* display: none; */
+            white-space: normal;
+        }
+        .popup-overlay .popup-content {
+            background-color: rgba(0, 0, 0, 0.7); /* 透明的黑色背景 */
+            color: white;
+            padding: 1px;
+            border-radius: 5px;
+        }
+        th:hover .popup-content {
+            display: block;
+        }
+        .sidebar {
+            width: 15%;
+            /* height: 200px; */
+            position: fixed;
+            /* border-style: solid; */
+            /* border-width: 2px; */
+            background-color: white;
+            /* margin-top: 20px; */
+        }
+        .Title_side{
+            font-size: 30px;
+            background-color: #47B5FF;
+            font-weight: bold;
+            text-align: center;
+            color: white;
+            /* margin-top: 5px; */
+            /* margin-bottom: 5px; */
+        }
+        .sider_body{
+            /* width: 260px; */
+            padding: auto;
+        }
+        /* ul {
+            margin: 0;
+            padding: 0;
+
+        } */
+
+        li {
+            padding-bottom: 10px; /* 设置列表项之间的垂直间距 */
+            font-size: 18px;
+            /* text-align: center; */
+
+        }
+        /* .icon_filter{
+            background-color: #47B5FF;
+        } */
+        /* .popup-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        } */
+    </style>
+    <script src="./scripts/table_cell.js"></script>
+    <div id="pieChart" style="width: 600px; height: 400px;margin: auto;margin-top:5px"></div>
+    <script src="./scripts/highchart_pie.js"></script>
+    <!-- <img src="./data/cell_type.png" alt="My Image" width="600px" height="400px" class="image"> -->
+    <div style="text-align: center;">
+        <img src="./data/cell_type.png" alt="My Image" width="100%" height="400px" style="display: block; margin: 0 auto;">
+    </div>
+    <div id="app_2">
+        <section id="section3">
+            <p class="title" style="font-size: 25px; font-weight:bold;">3. Bam statistic
+                <span class="info-icon" @mouseenter="showInfo(2)" @mouseleave="hideInfo(2)">
+                    <img src="./sources/circle-info-solid.svg" alt="Icon" style="width:20px;height:20px;" />
+                </span>
+            </p>
+            <div class="tooltip" v-show="activeInfoIndex === 2">
+                {{ items[2].info }}
+            </div>
+        </section>
+    </div>
+    <!-- <p class="title" style="font-size: 25px; font-weight:bold;"> 3. Bam statistic</p> -->
+    <div id="barline" style="width: 800px; height: 500px;margin: auto;"></div>
+    <script src="./scripts/bam_statistic.js"></script>
+    <div id="app_3">
+        <section id="section4">
+            <p class="title" style="font-size: 25px; font-weight:bold;">4. Mutation signature
+                <span class="info-icon" @mouseenter="showInfo(3)" @mouseleave="hideInfo(3)">
+                    <img src="./sources/circle-info-solid.svg" alt="Icon" style="width:20px;height:20px;" />
+                </span>
+            </p>
+            <div class="tooltip" v-show="activeInfoIndex === 3">
+                {{ items[3].info }}
+            </div>
+        </section>
+    </div>
+    <!-- <p class="title" style="font-size: 25px; font-weight:bold;"> 4. Mutation signature</p> -->
+    <div class="Tab" style="margin:auto;">
+        <div class="tabs" id="tabButtons" style="margin:auto;">
+        </div>
+        <div id="tabContents" style="margin:auto;">
+        </div>
+        <script src="./scripts/tab.js"></script>
+        <script src="./scripts/dynamic_tab.js"></script>
+    </div>
+    <div id="app_4">
+        <section id="section5">
+            <p class="title" style="font-size: 25px; font-weight:bold;">5. Top mutations
+                <span class="info-icon" @mouseenter="showInfo(4)" @mouseleave="hideInfo(4)">
+                    <img src="./sources/circle-info-solid.svg" alt="Icon" style="width:20px;height:20px;" />
+                </span>
+            </p>
+            <div class="tooltip" v-show="activeInfoIndex === 4">
+                {{ items[4].info }}
+            </div>
+        </section>
+    </div>
+    <!-- <p class="title" style="font-size: 25px; font-weight:bold;"> 5. Top20 mutations</p> -->
+    <div id="app">
+        <div style="margin-top:3px;">
+            <button @click="toggleFilterPanel" style="font-size: 20px;">
+                <img src="./sources/test.png" alt="Icon" style="width:20px;height:20px;" class="icon_filter" />Filters
+            </button>
+        </div>
+        <transition name="fade">
+            <div v-if="showFilterPanel" class="filter-panel">
+                <div v-for="(item, index) in filterItems" :key="index" class="filter-item">
+                    <label>{{ item.name }}:</label>
+                    <select v-model="item.condition">
+                        <option value="greater">Greater Than</option>
+                        <option value="less">Less Than</option>
+                    </select>
+                    <input type="number" v-model="item.threshold">
+                </div>
+                <div v-for="(item2, index) in filterItems2" :key="index" class="filter-item">
+                    <label>{{ item2.name }}:</label>
+                    <input type="text" v-model="item2.value">
+                </div>
+                <button @click="applyFilter(index)" style="margin-top: 5px;">Filter</button>
+                <button @click="Reset">Reset</button>
+            </div>
+        </transition>
+        <div class="table-container" style="margin-top:5px;">
+            <div class="table-wrapper">
+                    <table class="myTable">
+                        <thead>
+                            <tr>
+                                <th v-for="column in tableColumns" :key="column" class="thclass">
+                                    <div class="popup">
+                                        <p class="title" style="font-weight:bold;">
+                                            <span class="info-icon_new" @mouseenter="showInfo(column)" @mouseleave="hideInfo(column)" style="width:1px">
+                                                <!-- <i class="fas fa-info-circle" style="width:1px"></i> -->
+                                                {{ column }}
+                                            </span>
+                                            <button @click="sort(column)">
+                                                {{ sortKey === column ? (sortOrder === 1 ? '↑' : '↓') : '↑' }}
+                                            </button>
+                                        </p>
+                                        <div class="popup-overlay" v-show="activeInfoIndex === column">
+                                            <div class="popup-content">
+                                                {{ showcontent }}
+                                            </div>
+                                            <!-- {{ showcontent }} -->
+                                        </div>
+                                    </div>
+
+                                </th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="person in filteredTable" :key="person.CHROM_POS_REF_ALT">
+                                <td>
+                                    <button @click="showImage(person.CHROM_POS_REF_ALT)">
+                                        <a href="#section_imag">
+                                            {{ person.CHROM_POS_REF_ALT }}
+                                        </a>
+                                    </button>
+                                </td>
+                                <td v-for="column in tableset2" :key="column">{{ person[column] }}</td>
+                                <td>
+                                    <a :href="`https://www.genecards.org/cgi-bin/carddisp.pl?gene=${person.SYMBOL_vep}`">{{person.SYMBOL_vep}}</a>
+                                </td>
+                                <td>
+                                    <a :href="`https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=${person.Gene_vep}`">{{person.Gene_vep}}</a>
+                                </td>
+                                <td v-for="column in tableset3" :key="column">{{ person[column] }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+            </div>
+        </div>
+        <section id="section_imag">
+            <div v-show="selectedImageUrl != null" class="image-group">
+                <img :src="selectedImageUrl" alt="My Image" width=100% class="image" />
+                <img :src="selectedImageUrl2" alt="My Image" width=100% class="image" />
+            </div>
+        </section>
+    </div>
+    <script src="./scripts/test.js"></script>
+    <script src="./sources/vue.js"></script>
+    <script src="./scripts/main.js"></script>
+    <script src="./scripts/table_anno.js"></script>
+    </div>
+    <script>
+        function scrollToSection(sectionId) {
+            var section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    </script>
+</body>
+
+
+
+</html>
